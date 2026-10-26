@@ -43,6 +43,13 @@ assert.strictEqual(sessionUsage(sess), 100 + 50);
 assert.strictEqual(findSessionByTitle("My chat", path.join(root, "proj")), sess);
 assert.strictEqual(findSessionByTitle("Old", path.join(root, "proj")), undefined);
 assert.strictEqual(findSessionByTitle("My chat", path.join(root, "nothing")), undefined);
+// same title twice: newest file wins, or the one among `only`
+const dup = path.join(root, "proj", "dup.jsonl");
+fs.writeFileSync(dup, JSON.stringify({ type: "ai-title", aiTitle: "My chat" }));
+fs.utimesSync(sess, new Date(Date.now() - 60000), new Date(Date.now() - 60000));
+assert.strictEqual(findSessionByTitle("My chat", path.join(root, "proj")), dup);
+assert.strictEqual(findSessionByTitle("My chat", path.join(root, "proj"), [sess]), sess);
+fs.unlinkSync(dup);
 
 assert.strictEqual(projectDir("/Users/me/Repos/my.app", "/r"), "/r/-Users-me-Repos-my-app");
 

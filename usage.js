@@ -73,24 +73,33 @@ function projectDir(cwd, root = path.join(os.homedir(), ".claude", "projects")) 
   return path.join(root, cwd.replace(/[/\\.]/g, "-"));
 }
 
-/** Session file in `dir` whose (last) ai-title equals `title`, or undefined. Titles are what the chat tab shows. */
-function findSessionByTitle(title, dir) {
-  let names;
-  try { names = fs.readdirSync(dir); } catch { return; }
-  let prefixMatch;
-  for (const n of names) {
-    if (!n.endsWith(".jsonl")) continue;
-    const file = path.join(dir, n);
-    let last;
-    for (const line of fs.readFileSync(file, "utf8").split("\n")) {
-      if (!line.includes('"ai-title"')) continue;
-      try { const e = JSON.parse(line); if (e.type === "ai-title") last = e.aiTitle; } catch { /* skip */ }
-    }
-    if (last === title) return file;
-    // tab labels are truncated with "…"
-    if (last && title.endsWith("…") && last.startsWith(title.slice(0, -1))) prefixMatch = prefixMatch || file;
+/**
+ * Session file whose (last) ai-title equals `title`, or undefined. Titles are what the chat tab shows.
+ * Looks only at `only` (session files) when given, else at every session file in `dir`. When several
+ * match (same title), the most recently modified wins; an exact match beats a "…"-truncated prefix match.
+ */
+function findSessionByTitle(title, dir, only) {
+  let files = only;
+  if (!files) {
+    let names;
+    try { names = fs.readdirSync(dir); } catch { return; }
+    files = names.filter((n) => n.endsWith(".jsonl")).map((n) => path.join(dir, n));
   }
-  return prefixMatch;
+  const newest = (a, b) => (!a || fs.statSync(b).mtimeMs > fs.statSync(a).mtimeMs ? b : a);
+  let exact, prefix;
+  for (const file of files) {
+    let last;
+    try {
+      for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+        if (!line.includes('"ai-title"')) continue;
+        try { const e = JSON.parse(line); if (e.type === "ai-title") last = e.aiTitle; } catch { /* skip */ }
+      }
+    } catch { continue; }
+    if (last === title) exact = newest(exact, file);
+    // tab labels are truncated with "…"
+    else if (last && title.endsWith("…") && last.startsWith(title.slice(0, -1))) prefix = newest(prefix, file);
+  }
+  return exact || prefix;
 }
 
 /** Weighted tokens of one session file incl. its subagents (like `usage.py <file>`). */
