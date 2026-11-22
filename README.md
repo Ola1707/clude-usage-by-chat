@@ -54,8 +54,7 @@ Command Palette → **Claude usage: Settings**, or click `⚙`.
 
 | Setting | Default | What it does |
 |---|---|---|
-| `claudeUsage.limit5h` | `0` | The 5h limit in weighted tokens. `0` means by your plan. |
-| `claudeUsage.autoCalibrate` | `false` | Use the calibrated limit instead of `limit5h`. |
+| `claudeUsage.limit5h` | `0` | The 5h limit in weighted tokens. `0` means by your plan (Pro 10,000,000). The extension never changes it on its own: edit it, or click `cost est` → **Update**. |
 | `claudeUsage.showCostEstimate` | `true` | Show `cost est`. |
 | `claudeUsage.refreshSeconds` | `60` | How often to recompute 5h, week and chats. |
 | `claudeUsage.chatRefreshSeconds` | `5` | How often to recompute the focused chat. |

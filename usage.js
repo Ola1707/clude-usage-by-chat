@@ -311,7 +311,7 @@ function oauthCredentials() {
 const oauthToken = () => oauthCredentials().accessToken;
 
 /** Starting 5h limit per plan, in weighted tokens, until calibrated. Max 20x is 4x Max 5x. */
-const PLAN_LIMITS5H = { pro: 1000000, max_5x: 45000000, max_20x: 180000000 };
+const PLAN_LIMITS5H = { pro: 10000000, max_5x: 45000000, max_20x: 180000000 };
 const PLAN_NAMES = { pro: "Pro", max_5x: "Max 5x", max_20x: "Max 20x" };
 
 /** Plan key of PLAN_LIMITS5H from a rate limit tier ("default_claude_max_5x") or subscription type ("pro"). */

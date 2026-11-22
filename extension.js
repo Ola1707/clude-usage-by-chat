@@ -102,12 +102,6 @@ function configuredLimit5h() {
     : { limit: PLAN_LIMITS5H.pro, source: "plan unknown yet, Pro assumed" };
 }
 
-/** Calibrated 5h limit of the current window (if claudeUsage.autoCalibrate), else configuredLimit5h. */
-function limit5h(state) {
-  const config = vscode.workspace.getConfiguration("claudeUsage");
-  return (config.get("autoCalibrate", false) && currentCalibration(state)?.limit) || configuredLimit5h().limit;
-}
-
 // Estimated cost of a token vs what the status bar assumes: the limit5h setting / the calibrated limit.
 // ×1.14 means the real limit is smaller, so a chat really costs 14% more than the status bar says. Rename the label here.
 const COST_LABEL = "cost est";
@@ -191,7 +185,7 @@ function activate(context) {
     try {
       const file = focusedChatFile();
       if (file) {
-        const limit = limit5h(context.globalState);
+        const limit = configuredLimit5h().limit;
         const { total, recent } = sessionTotals(file, windowStart5h());
         const percent = (recent / limit) * 100;
         chat = `chat: ${percent.toFixed(1)}%`;
@@ -250,7 +244,7 @@ function activate(context) {
       const folders = vscode.workspace.workspaceFolders;
       if (!folders) throw new Error("no workspace folder");
       const { count, total } = activeUsage(folders.map((f) => f.uri.fsPath), windowStart5h());
-      chats = `chats: ${((total / limit5h(context.globalState)) * 100).toFixed(1)}% (${count})`;
+      chats = `chats: ${((total / configuredLimit5h().limit) * 100).toFixed(1)}% (${count})`;
     } catch { /* leave the chats part out */ }
     chatsItem.text = chats;
     chats ? chatsItem.show() : chatsItem.hide();
@@ -258,12 +252,9 @@ function activate(context) {
       const { fiveHour, weekly } = await cachedServerUsage((calib) => calibrate(context.globalState, calib), force);
       refreshCal();
       const cal = context.globalState.get("limit5h");
-      const auto = vscode.workspace.getConfiguration("claudeUsage").get("autoCalibrate", false);
       const calInfo = cal && `${Math.round(cal.limit).toLocaleString()} (calibrated at ${Math.round(cal.percent)}%)`;
-      const limitInfo = auto && cal
-        ? `5h limit: ${calInfo}`
-        : `5h limit: ${limit5h(context.globalState).toLocaleString()} (${configuredLimit5h().source})` +
-          (cal ? `\nCalibrated estimate, not used: ${calInfo}` : "");
+      const limitInfo = `5h limit: ${configuredLimit5h().limit.toLocaleString()} (${configuredLimit5h().source})` +
+        (cal ? `\nCalibrated estimate (click cost est to use it): ${calInfo}` : "");
       item.text = `🦄 5h: ${Math.round(fiveHour.percent)}% week: ${Math.round(weekly.percent)}% $(sync)`;
       item.tooltip = `Claude usage (click to fetch from the server now)\n5h resets ${new Date(fiveHour.resetsAt).toLocaleTimeString()}\nWeek resets ${new Date(weekly.resetsAt).toLocaleString()}\n${limitInfo}${tabInfo}`;
     } catch (err) {

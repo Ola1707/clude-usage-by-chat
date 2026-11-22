@@ -2,7 +2,7 @@ const assert = require("assert");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { weights, weigh, usage5h, usage7d, estimateLimit5h, sameWindow, addCalibrationReading, excludeWindow, planKey, sessionTotals, sessionUsage, findSessionByTitle, projectDir, activeUsage, activeSessions, parsePs, processTree, processUsage } = require("../usage");
+const { weights, weigh, usage5h, usage7d, estimateLimit5h, sameWindow, addCalibrationReading, excludeWindow, planKey, PLAN_LIMITS5H, sessionTotals, sessionUsage, findSessionByTitle, projectDir, activeUsage, activeSessions, parsePs, processTree, processUsage } = require("../usage");
 
 assert.strictEqual(
   weigh({ input_tokens: 10, output_tokens: 2, cache_creation_input_tokens: 4, cache_read_input_tokens: 100 }),
@@ -84,6 +84,7 @@ assert.strictEqual(ex.excluded, undefined);
 assert.strictEqual(planKey("default_claude_max_5x"), "max_5x");
 assert.strictEqual(planKey("default_claude_max_20x"), "max_20x");
 assert.strictEqual(planKey("default_claude_ai", "pro"), "pro");
+assert.strictEqual(PLAN_LIMITS5H.pro, 10000000);
 assert.strictEqual(planKey("", "max"), "max_5x");
 assert.strictEqual(planKey(undefined, undefined), undefined);
 
