@@ -1,5 +1,7 @@
 # Claude usage by chat
 
+> **Moved to [Ola1707/claude-usage-by-chat](https://github.com/Ola1707/claude-usage-by-chat).** This repo is archived and no longer updated.
+
 A VS Code extension that shows your Claude Code usage in the status bar: the 5-hour and weekly limits, and how much of the 5h limit each chat uses. Unofficial, not made by Anthropic.
 
 ```
