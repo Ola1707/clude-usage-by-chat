@@ -9,20 +9,27 @@
   "activationEvents": ["onStartupFinished"],
   "contributes": {
     "commands": [
-      { "command": "claudeUsage.setLimitFromCalibration", "title": "Claude usage: Update 5h limit from calibration" }
+      { "command": "claudeUsage.setLimitFromCalibration", "title": "Claude usage: Cost estimate (update the 5h limit, or hide)" },
+      { "command": "claudeUsage.refreshServer", "title": "Claude usage: Fetch 5h and weekly usage now" },
+      { "command": "claudeUsage.openSettings", "title": "Claude usage: Settings" }
     ],
     "configuration": {
       "title": "Claude usage by chat",
       "properties": {
         "claudeUsage.limit5h": {
           "type": "number",
-          "default": 7500000,
-          "description": "Weighted-token limit for the 5h window. With autoCalibrate on, a fallback until the first calibration."
+          "default": 0,
+          "description": "Weighted-token limit for the 5h window. 0: by your plan (Pro 1,000,000; Max 5x 45,000,000; Max 20x 180,000,000). With autoCalibrate on, a fallback until the first calibration."
         },
         "claudeUsage.autoCalibrate": {
           "type": "boolean",
           "default": false,
           "description": "Use the 5h limit calibrated from the server 5h percent (once that is at least 10%) instead of limit5h. The estimate is shown in the tooltip either way."
+        },
+        "claudeUsage.showCostEstimate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the cost estimate (cost est) in the status bar."
         },
         "claudeUsage.limitWeekly": {
           "type": "number",
@@ -33,6 +40,23 @@
           "type": "number",
           "default": 60,
           "description": "How often to recompute usage."
+        },
+        "claudeUsage.processStats": {
+          "type": "string",
+          "enum": ["cpu+memory", "cpu", "memory", "off"],
+          "enumDescriptions": ["CPU and memory", "CPU only", "Memory only", "Hide the item"],
+          "default": "cpu+memory",
+          "description": "What the CPU/memory status bar item of the running chats shows."
+        },
+        "claudeUsage.processIncludeChildren": {
+          "type": "boolean",
+          "default": true,
+          "description": "Count a chat's child processes (shell commands, MCP servers) in the CPU/memory numbers. Off: only the chat processes themselves."
+        },
+        "claudeUsage.processRefreshSeconds": {
+          "type": "number",
+          "default": 5,
+          "description": "How often to update the CPU/memory item (runs ps)."
         },
         "claudeUsage.chatRefreshSeconds": {
           "type": "number",
